@@ -31,8 +31,8 @@ A real-time network packet capture and analysis tool built with Python (Flask), 
 ### Step 1: Install Dependencies
 1. Clone the repository:
     ```bash
-    git clone 
-    cd 
+    git clone https://github.com/KashifMalik777/PRODIGY_CS_05.git
+    cd PRODIGY_CS_05
     ```
 
 2. Install the required Python packages:

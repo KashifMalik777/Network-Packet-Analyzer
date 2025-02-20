@@ -69,9 +69,9 @@ A real-time network packet capture and analysis tool built with Python (Flask), 
    - Click the **Download Packets as TXT** button to download the captured packet data in `.txt` format. This will allow you to save and review the packet details offline.
 ---
 
-## Example Screenshot 📸
+## Demo 📸
 ![Network Packet Analyzer Screenshot](network.gif)  
-*Image of the user interface showing captured packets.*
+*Demo of the user interface showing captured packets.*
 
 ## Troubleshooting ⚠️
 

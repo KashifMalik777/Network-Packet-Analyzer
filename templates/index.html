@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Packet Analyzer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    #packet-panel {
+      margin-top: 20px;
+      max-height: 600px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+    }
+    .panel-header {
+      position: sticky;
+      top: 0;
+      background-color: #f9f9f9;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      z-index: 1;
+    }
+    .panel-header h2 {
+      margin: 0;
+      text-align: center;
+    }
+    #packets {
+      list-style-type: none;
+      padding: 10px;
+      margin: 0;
+    }
+    #packets li {
+      background-color: #fff;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .button-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .action-btn {
+      display: inline-block;
+      margin: 0 10px;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .action-btn:hover {
+      background-color: #218838;
+    }
+    .toggle-btn {
+      background-color: #dc3545;
+    }
+    .toggle-btn:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Network Packet Analyzer</h1>
+    <div id="packet-panel">
+      <div class="panel-header">
+        <h2>Captured Packets</h2>
+      </div>
+      <ul id="packets"></ul>
+    </div>
+    <div class="button-container">
+      <button class="action-btn" onclick="downloadPackets()">Download Packets as TXT</button>
+      <button id="captureToggle" class="action-btn toggle-btn" onclick="toggleCapture()">Start</button>
+    </div>
+  </div>
+  <script>
+    let isCapturing = false; // Initially not capturing
+
+    // Function to fetch and display packets every second
+    function fetchPackets() {
+      fetch('/packets')
+        .then(response => response.json())
+        .then(data => {
+          const packetList = document.getElementById('packets');
+          packetList.innerHTML = '';
+          data.forEach(packet => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+              <strong>Source IP:</strong> ${packet.src_ip}<br>
+              <strong>Destination IP:</strong> ${packet.dst_ip}<br>
+              <strong>Protocol:</strong> ${packet.protocol}<br>
+              <strong>TTL:</strong> ${packet.ttl}<br>
+              <strong>IP Version:</strong> ${packet.ip_version}<br>
+              <strong>IP Length:</strong> ${packet.ip_len}<br>
+              <strong>Source Port:</strong> ${packet.src_port || 'N/A'}<br>
+              <strong>Destination Port:</strong> ${packet.dst_port || 'N/A'}<br>
+              <strong>Payload:</strong> ${packet.payload || 'N/A'}<br>
+              ${ packet.seq && packet.seq !== "N/A" ? `<strong>Sequence:</strong> ${packet.seq}<br>` : '' }
+              ${ packet.ack && packet.ack !== "N/A" ? `<strong>Acknowledgment:</strong> ${packet.ack}<br>` : '' }
+              ${ packet.flags && packet.flags !== "N/A" ? `<strong>Flags:</strong> ${packet.flags}<br>` : '' }
+            `;
+            packetList.appendChild(li);
+          });
+          // Auto-scroll only when capturing is active
+          if (isCapturing) {
+            const packetPanel = document.getElementById('packet-panel');
+            packetPanel.scrollTop = packetPanel.scrollHeight;
+          }
+        });
+    }
+
+    // Toggle between starting and stopping packet capture
+    function toggleCapture() {
+      if (!isCapturing) {
+        fetch('/start')
+          .then(response => response.json())
+          .then(data => {
+            alert('Packet capture started.');
+            isCapturing = true;
+            document.getElementById('captureToggle').innerText = 'Stop';
+          });
+      } else {
+        fetch('/stop')
+          .then(response => response.json())
+          .then(data => {
+            alert('Packet capture stopped.');
+            isCapturing = false;
+            document.getElementById('captureToggle').innerText = 'Start';
+          });
+      }
+    }
+
+    // Function to download packets as a TXT file
+    function downloadPackets() {
+      fetch('/packets')
+        .then(response => response.json())
+        .then(data => {
+          let text = '';
+          data.forEach(packet => {
+            text += `Source IP: ${packet.src_ip}\n`;
+            text += `Destination IP: ${packet.dst_ip}\n`;
+            text += `Protocol: ${packet.protocol}\n`;
+            text += `TTL: ${packet.ttl}\n`;
+            text += `IP Version: ${packet.ip_version}\n`;
+            text += `IP Length: ${packet.ip_len}\n`;
+            text += `Source Port: ${packet.src_port || 'N/A'}\n`;
+            text += `Destination Port: ${packet.dst_port || 'N/A'}\n`;
+            text += `Payload: ${packet.payload || 'N/A'}\n`;
+            if(packet.seq && packet.seq !== "N/A") text += `Sequence: ${packet.seq}\n`;
+            if(packet.ack && packet.ack !== "N/A") text += `Acknowledgment: ${packet.ack}\n`;
+            if(packet.flags && packet.flags !== "N/A") text += `Flags: ${packet.flags}\n`;
+            text += '---------------------------\n';
+          });
+          const blob = new Blob([text], { type: 'text/plain' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'packets.txt';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        });
+    }
+
+    // Start fetching packets every second
+    setInterval(fetchPackets, 1000);
+  </script>
+</body>
+</html>

@@ -81,7 +81,6 @@ A real-time network packet capture and analysis tool built with Python (Flask), 
 
 ## Contributing 🤝
 
-We welcome contributions to improve the project! If you'd like to contribute, please fork the repository and submit a pull request.
----
+I welcome contributions to improve the project! If you'd like to contribute, please fork the repository and submit a pull request.
 
 Enjoy capturing and analyzing network traffic with your new **Network Packet Analyzer**! 🔍🌐

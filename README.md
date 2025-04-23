@@ -1,4 +1,3 @@
-# PRODIGY_CS_05
 # Network Packet Analyzer 🚀
 
 A real-time network packet capture and analysis tool built with Python (Flask), Scapy, and Npcap. This project enables you to monitor and analyze incoming and outgoing network traffic, providing detailed insights into IP, TCP, and UDP headers with a simple and intuitive web interface.
